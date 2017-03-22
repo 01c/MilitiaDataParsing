@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MilitiaDataParsing</name>
+    </assembly>
+    <members>
+        <member name="P:MilitiaDataParsing.IParsable.Header">
+            <summary>
+            Source data header for this object type. Will use type name if null.
+            <para>Example: { get { return null; } }</para>
+            <para>Example: { get { return "data_type_name"; } }</para>
+            </summary>
+        </member>
+        <member name="M:MilitiaDataParsing.IParsable.Parsing(MilitiaDataParsing.Parser)">
+            <summary>
+            Called when importing or exporting and is used connect all fields or properties with their specified keys. Not intended to be called manually.
+            </summary>
+            <param name="parse">Parser containing methods for parsing values.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.TryParse``1(System.String)">
+            <summary>
+            Called when importing values. Override to extend parsing capabilities.
+            </summary>
+            <param name="data">The value loaded from source data.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.List``1(System.String,System.Collections.Generic.List{``0})">
+            <summary>
+            Parses a list. To be called within Parsing method.
+            <para>Usage: Property = List("key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">List to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Auto``1(System.String,``0@)">
+            <summary>
+            Parse any value. To be called within Parsing method.
+            <para>Usage: Auto("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Auto``1(System.String,``0)">
+            <summary>
+            Parse any value. To be called within Parsing method.
+            <para>Usage: Property = Auto("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Value(System.String,System.Object@)">
+            <summary>
+            Parses a value. To be called within Parsing method.
+            <para>Usage: String("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Value(System.String,System.Object)">
+            <summary>
+            Parses a value. To be called within Parsing method.
+            <para>Usage: Property = String("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Property to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Bool(System.String,System.Boolean@)">
+            <summary>
+            Parses a bool value. To be called within Parsing method.
+            <para>Usage: Bool("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Bool(System.String,System.Boolean)">
+            <summary>
+            Parses a bool value. To be called within Parsing method.
+            <para>Usage: Property = Bool("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Property to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Enum``1(System.String,``0@)">
+            <summary>
+            Parses a enum value. To be called within Parsing method.
+            <para>Usage: Enum("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Enum``1(System.String,``0)">
+            <summary>
+            Parses a enum value. To be called within Parsing method.
+            <para>Usage: Property = Enum("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Property to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Float(System.String,System.Single@)">
+            <summary>
+            Parses a float value. To be called within Parsing method.
+            <para>Usage: Float("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Float(System.String,System.Single)">
+            <summary>
+            Parses a float value. To be called within Parsing method.
+            <para>Usage: Property = Float("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Property to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,``0@)">
+            <summary>
+            Parses a generic value. To be called within Parsing method.
+            <para>Usage: Generic&lt;DataType&gt;("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,``0)">
+            <summary>
+            Parses a generic value. To be called within Parsing method.
+            <para>Usage: Property = Generic&lt;DataType&gt;("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Int(System.String,System.Int32@)">
+            <summary>
+            Parses an int value. To be called within Parsing method.
+            <para>Usage: Int("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.Int(System.String,System.Int32)">
+            <summary>
+            Parses an int value. To be called within Parsing method.
+            <para>Usage: Property = Int("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Property to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.String(System.String,System.String@)">
+            <summary>
+            Parses a string value. To be called within Parsing method.
+            <para>Usage: String("field_key", field);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="field">Field to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.Parser.String(System.String,System.String)">
+            <summary>
+            Parses a string value. To be called within Parsing method.
+            <para>Usage: Property = String("property_key", Property);</para>
+            </summary>
+            <param name="key">Key in source data.</param>
+            <param name="property">Property to be processed.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.Import``1(System.String)">
+            <summary>
+            Creates a new object from source data.
+            </summary>
+            <param name="data">Source data.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.Update(System.String,MilitiaDataParsing.IParsable)">
+            <summary>
+            Updates an existing object with source data.
+            </summary>
+            <param name="data">Source data.</param>
+            <param name="obj">Existing object.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.Export(MilitiaDataParsing.IParsable)">
+            <summary>
+            Creates source data for an existing object.
+            </summary>
+            <param name="obj">Object.</param>
+        </member>
+    </members>
+</doc>
