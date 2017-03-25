@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace MilitiaDataParsing
+﻿namespace MilitiaDataParsing
 {
+    /// <summary>
+    /// Defines methods which are required to parse the object.
+    /// </summary>
     public interface IParsable
     {
         /// <summary>

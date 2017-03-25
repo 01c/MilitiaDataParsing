@@ -2,12 +2,22 @@
 
 namespace MilitiaDataParsing
 {
-    public class ErrorOccuredEventArgs : EventArgs
+    /// <summary>
+    /// Defines information about a parsing warning or error.
+    /// </summary>
+    public class OutputEventArgs : EventArgs
     {
-        public string Message { get; set; }
-        public Exception Exception { get; set; }
+        /// <summary>
+        /// Message detailing the cause of warning or error.
+        /// </summary>
+        public string Message { get; private set; }
 
-        public ErrorOccuredEventArgs(string message, Exception exception)
+        /// <summary>
+        /// The exception thrown causing the warning or error.
+        /// </summary>
+        public Exception Exception { get; private set; }
+
+        internal OutputEventArgs(string message, Exception exception)
         {
             Message = message;
             Exception = exception;

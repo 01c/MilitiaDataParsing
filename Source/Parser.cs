@@ -3,22 +3,58 @@ using System.Collections.Generic;
 
 namespace MilitiaDataParsing
 {
+    /// <summary>
+    /// Current task of a parser.
+    /// </summary>
+    public enum Task
+    {
+        /// <summary>
+        /// Indicates that the parser is currently not parsing any data.
+        /// </summary>
+        Sleeping,
+        /// <summary>
+        /// Indicates that the parser is currently importing data.
+        /// </summary>
+        Importing,
+        /// <summary>
+        /// Indicates that the parser is currently exporting data.
+        /// </summary>
+        Exporting
+    }
+
+    /// <summary>
+    /// Represents a parser and its logic used to export and import data.
+    /// </summary>
     public class Parser
     {
         #region Properties
-        public static event EventHandler<ErrorOccuredEventArgs> ErrorOccured;
+        /// <summary>
+        /// States the current task of the parser.
+        /// </summary>
+        public Task Task { get; private set; }
         #endregion Properties
 
         #region Fields
-        protected internal ParseBuffer buffer;
+        internal ParseBuffer buffer;
         private string mainContainer;
         private ParserHandler handler;
 
         private string[] stringValues;
         private const string stringValueReferenceSymbol = "@";
 
+        /// <summary>
+        /// Symbol to surround string values.
+        /// </summary>
         protected string stringSymbol = "\"";
+
+        /// <summary>
+        /// Indicates the start of a new container.
+        /// </summary>
         protected string containerHeaderSymbol = "{";
+
+        /// <summary>
+        /// Indicates the end of a container.
+        /// </summary>
         protected string containerFooterSymbol = "}";
         #endregion Fields
 
@@ -34,12 +70,12 @@ namespace MilitiaDataParsing
         internal void Initialize(ParserHandler handler)
         {
             this.handler = handler;
+            Reset();
         }
 
-        internal void OnErrorOccured(string message, Exception exception)
+        private void Output(string message, Exception exception)
         {
-            if (ErrorOccured != null)
-                ErrorOccured(this, new ErrorOccuredEventArgs("Error occured loading \"" + mainContainer + "\". " + message, exception));
+            handler.OnOutput("Error occured loading \"" + mainContainer + "\". " + message, exception);
         }
 
         #region Syntax
@@ -101,7 +137,7 @@ namespace MilitiaDataParsing
         private string Case(string text)
         {
             // Ignore case when loading.
-            if (buffer.mode == Mode.Load && true)
+            if (Task == Task.Importing && true)
                 return text.ToLower();
             return text;
         }
@@ -111,15 +147,16 @@ namespace MilitiaDataParsing
         internal void Reset()
         {
             stringValues = null;
+            this.Task = Task.Sleeping;
         }
 
-        internal object Process(string mainContext, Mode mode, IParsable obj)
+        internal IParsable Process(string mainContext, Task mode, IParsable obj)
         {
             buffer = new ParseBuffer();
-            buffer.mode = mode;
+            Task = mode;
 
             // Index string values.
-            if (mode == Mode.Load && stringValues == null)
+            if (mode == Task.Importing && stringValues == null)
             {
                 List<string> strings = new List<string>();
                 int stringIndex = 0;
@@ -153,7 +190,7 @@ namespace MilitiaDataParsing
             buffer.contexts.Add(mainContext);
 
             // Set appropriate context before parsing.
-            mainContainer = obj.Header != null ? obj.Header : obj.GetType().Name;
+            mainContainer = handler.GetIParsableHeader(obj);
             if (SetContext(mainContainer))
             {
                 obj.Parsing(this);
@@ -197,9 +234,9 @@ namespace MilitiaDataParsing
 
         private bool SetContext(string key)
         {
-            switch (buffer.mode)
+            switch (Task)
             {
-                case Mode.Load:
+                case Task.Importing:
                     string newContext = GetContainerContents(key, buffer.currentContext);
                     if (newContext != null)
                     {
@@ -209,7 +246,7 @@ namespace MilitiaDataParsing
                         return true;
                     }
                     return false;
-                case Mode.Save:
+                case Task.Exporting:
                     Write(ContainerHeader(key));
                     buffer.indentIndex++;
                     break;
@@ -219,13 +256,13 @@ namespace MilitiaDataParsing
 
         private void EndContext(string key)
         {
-            switch (buffer.mode)
+            switch (Task)
             {
-                case Mode.Load:
+                case Task.Importing:
                     buffer.contextIndex--;
                     buffer.contexts.RemoveAt(buffer.contexts.Count - 1);
                     break;
-                case Mode.Save:
+                case Task.Exporting:
                     buffer.indentIndex--;
                     Write(ContainerFooter(key));
                     break;
@@ -273,7 +310,7 @@ namespace MilitiaDataParsing
             }
             while (iHeader != -1 || iFooter != -1);
 
-            OnErrorOccured("Failed retrieving length of \"" + key + "\" container.", null);
+            Output("Failed retrieving length of \"" + key + "\" container.", null);
             return -1;
         }
 
@@ -283,7 +320,7 @@ namespace MilitiaDataParsing
             int headerIndex = Case(context).IndexOf(ContainerHeader(key));
             if (headerIndex == -1)
             {
-                OnErrorOccured("Couldn't find header for \"" + key + "\" key.", null);
+                Output("Couldn't find header for \"" + key + "\" key.", null);
                 return null;
             }
 
@@ -322,6 +359,10 @@ namespace MilitiaDataParsing
 
                 if (valueIndex == -1)
                     break;
+                // Make sure value before key is tab.
+                // To prevent picking up values from keys which end the same.
+                else if (!context.Substring(valueIndex - 1).StartsWith("\t"))
+                    continue;
 
                 string between = context.Substring(0, valueIndex);
 
@@ -366,8 +407,10 @@ namespace MilitiaDataParsing
             {
                 // Store current buffer.
                 ParseBuffer mainBuffer = buffer;
+
                 // Get source data for child object.
-                val = EmbeddedObjectKeyword() + handler.ExportProcess(value as IParsable);
+                val = EmbeddedObjectKeyword() + handler.ExportProcess(parsable);
+
                 // Restore buffer.
                 buffer = mainBuffer;
 
@@ -393,7 +436,7 @@ namespace MilitiaDataParsing
             // Not found, key doesn't exist in this context.
             if (iHeader == -1)
             {
-                OnErrorOccured("Couldn't find key header for \"" + key + "\".", null);
+                Output("Couldn't find key header for \"" + key + "\".", null);
                 return null;
             }
 
@@ -436,11 +479,11 @@ namespace MilitiaDataParsing
 
         private string ProcessValue(string key, object value)
         {
-            switch (buffer.mode)
+            switch (Task)
             {
-                case Mode.Load:
+                case Task.Importing:
                     return ReadValue(key);
-                case Mode.Save:
+                case Task.Exporting:
                     return WriteValue(key, value);
             }
             return null;
@@ -456,16 +499,16 @@ namespace MilitiaDataParsing
         /// <param name="property">List to be processed.</param>
         public List<T> List<T>(string key, List<T> property)
         {
-            switch (buffer.mode)
+            switch (Task)
             {
-                case Mode.Load:
+                case Task.Importing:
                     List<T> list = new List<T>();
                     foreach (T rawValue in ParseList<T>(key))
                     {
                         list.Add(rawValue);
                     }
                     return list;
-                case Mode.Save:
+                case Task.Exporting:
                     if (SetContext(key))
                     {
                         for (int i = 0; i < property.Count; i++)
@@ -606,13 +649,15 @@ namespace MilitiaDataParsing
         /// </summary>
         /// <param name="key">Key in source data.</param>
         /// <param name="property">Field to be processed.</param>
-        public T Generic<T>(string key, T property)
+        public T Generic<T>(string key, object property)
         {
             string processed = ProcessValue(key, property);
-            if (buffer.mode == Mode.Save)
-                return property;
+            if (Task == Task.Exporting)
+                return (T)property;
             else
+            {
                 return ParseGeneric<T>(processed);
+            }
         }
 
         /// <summary>
@@ -656,11 +701,11 @@ namespace MilitiaDataParsing
         /// <param name="property">Property to be processed.</param>
         public string String(string key, string property)
         {
-            switch (buffer.mode)
+            switch (Task)
             {
-                case Mode.Load:
+                case Task.Importing:
                     return ParseString(ProcessValue(key, property));
-                case Mode.Save:
+                case Task.Exporting:
                     ProcessValue(key, ParseString(property));
                     return property;
             }
@@ -698,6 +743,7 @@ namespace MilitiaDataParsing
         private T ParseAuto<T>(string key, object property)
         {
             Type type = typeof(T);
+
             // Bool.
             if (type == typeof(bool))
                 return (T)(object)Bool(key, bool.Parse(property.ToString()));
@@ -713,13 +759,10 @@ namespace MilitiaDataParsing
             // String.
             else if (type == typeof(string))
                 return (T)(object)String(key, property as string);
+            // Generic.
             else
             {
-                string processed = ProcessValue(key, property);
-                if (buffer.mode == Mode.Save)
-                    return (T)property;
-
-                return ParseGeneric<T>(processed);
+                return Generic<T>(key, property);
             }
         }
 
@@ -749,14 +792,29 @@ namespace MilitiaDataParsing
             if (value == "" || value == null)
                 return default(T);
 
-            // Is a parsable object.
+            // Is a new (parsable) object.
             if (value.StartsWith(EmbeddedObjectKeyword()) && typeof(IParsable).IsAssignableFrom(typeof(T)))
             {
                 // Remove keyword before parsing.
                 value = value.Substring(EmbeddedObjectKeyword().Length);
+
+                Type type = typeof(T);
+                // Check if object is inherited from type.
+                foreach (StoredType storedType in handler.storedTypes)
+                {
+                    if (value.StartsWith(ContainerHeader(storedType.Header)) && type.IsAssignableFrom(storedType.Type))
+                    {
+                        type = storedType.Type;
+                        break;
+                    }
+                }
+
                 // Store current buffer.
                 ParseBuffer mainBuffer = buffer;
-                IParsable obj = (IParsable)handler.ImportProcess<T>(value);
+
+                // Get object.
+                IParsable obj = handler.ImportProcess(value, type);
+
                 // Restore buffer.
                 buffer = mainBuffer;
 
@@ -775,7 +833,7 @@ namespace MilitiaDataParsing
                     }
                     catch (Exception exception)
                     {
-                        OnErrorOccured("Failed converting " + value + " to " + typeof(T) + ". Try overriding TryParse() to extend parsing capabilities.", exception);
+                        Output("Failed converting " + value + " to " + typeof(T) + ". Try overriding TryParse() to extend parsing capabilities.", exception);
                     }
                 }
 
@@ -793,16 +851,19 @@ namespace MilitiaDataParsing
 
         private string ParseString(string value)
         {
-            switch (buffer.mode)
+            if (value == null)
+                return null;
+
+            switch (Task)
             {
-                case Mode.Load:
+                case Task.Importing:
                     if (value.StartsWith(stringValueReferenceSymbol))
                     {
                         int index = int.Parse(value.Substring(stringValueReferenceSymbol.Length));
                         return stringValues[index];
                     }
                     return value;
-                case Mode.Save:
+                case Task.Exporting:
                     value = value.Replace(stringSymbol, Escaped(stringSymbol));
                     value = "\"" + value + "\"";
                     return value;

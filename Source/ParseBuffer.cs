@@ -2,12 +2,11 @@
 
 namespace MilitiaDataParsing
 {
-    public class ParseBuffer
+    internal class ParseBuffer
     {
+        #region Fields
         internal int indentIndex;
         internal string output;
-
-        public Mode mode { get; set; }
 
         internal List<string> contexts;
         internal int contextIndex;
@@ -16,8 +15,9 @@ namespace MilitiaDataParsing
             get { return contexts[contextIndex]; }
             set { contexts[contextIndex] = value; }
         }
+        #endregion Fields
 
-        public ParseBuffer()
+        internal ParseBuffer()
         {
             contexts = new List<string>();
             contextIndex = 0;

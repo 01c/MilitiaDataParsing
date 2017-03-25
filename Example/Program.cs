@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MilitiaDataParsing;
+using System.Reflection;
 
 namespace Example
 {
@@ -8,8 +9,7 @@ namespace Example
     {
         static void Main(string[] args)
         {
-            ParserHandler parser = new ParserHandler();
-            Parser.ErrorOccured += Parser_ErrorOccured;
+            ParserHandler parser = new ParserHandler(ParserOnOutput);
 
             Organization org = new Organization("Parsing \" Inc", true, new Person("Donna", "Kearney", 33, Gender.Female, new Details("3572 Poling Farm Road", "402-354-7168", "donna.kearney@parsing.inc")), new Details("2891 Jessie Street", "740-663-1757", "business@parsing.inc"));
             org.Owner.Devices.Add(new Device("UPhone 80E", "2017-03-21"));
@@ -40,7 +40,7 @@ namespace Example
             Console.ReadLine();
         }
 
-        private static void Parser_ErrorOccured(object sender, ErrorOccuredEventArgs e)
+        private static void ParserOnOutput(object sender, OutputEventArgs e)
         {
             Console.WriteLine(e.Message);
         }
@@ -62,9 +62,9 @@ namespace Example
                 Email = email;
             }
 
-            public string Header { get { return "details"; } }
+            public virtual string Header { get { return "details"; } }
 
-            public void Parsing(Parser parse)
+            public virtual void Parsing(Parser parse)
             {
                 Address = parse.Auto("address", Address);
                 Phone = parse.Auto("phone", Phone);

@@ -4,6 +4,11 @@
         <name>MilitiaDataParsing</name>
     </assembly>
     <members>
+        <member name="T:MilitiaDataParsing.IParsable">
+            <summary>
+            Defines methods which are required to parse the object.
+            </summary>
+        </member>
         <member name="P:MilitiaDataParsing.IParsable.Header">
             <summary>
             Source data header for this object type. Will use type name if null.
@@ -16,6 +21,51 @@
             Called when importing or exporting and is used connect all fields or properties with their specified keys. Not intended to be called manually.
             </summary>
             <param name="parse">Parser containing methods for parsing values.</param>
+        </member>
+        <member name="T:MilitiaDataParsing.Task">
+            <summary>
+            Current task of a parser.
+            </summary>
+        </member>
+        <member name="F:MilitiaDataParsing.Task.Sleeping">
+            <summary>
+            Indicates that the parser is currently not parsing any data.
+            </summary>
+        </member>
+        <member name="F:MilitiaDataParsing.Task.Importing">
+            <summary>
+            Indicates that the parser is currently importing data.
+            </summary>
+        </member>
+        <member name="F:MilitiaDataParsing.Task.Exporting">
+            <summary>
+            Indicates that the parser is currently exporting data.
+            </summary>
+        </member>
+        <member name="T:MilitiaDataParsing.Parser">
+            <summary>
+            Represents a parser and its logic used to export and import data.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.Parser.Task">
+            <summary>
+            States the current task of the parser.
+            </summary>
+        </member>
+        <member name="F:MilitiaDataParsing.Parser.stringSymbol">
+            <summary>
+            Symbol to surround string values.
+            </summary>
+        </member>
+        <member name="F:MilitiaDataParsing.Parser.containerHeaderSymbol">
+            <summary>
+            Indicates the start of a new container.
+            </summary>
+        </member>
+        <member name="F:MilitiaDataParsing.Parser.containerFooterSymbol">
+            <summary>
+            Indicates the end of a container.
+            </summary>
         </member>
         <member name="M:MilitiaDataParsing.Parser.TryParse``1(System.String)">
             <summary>
@@ -119,7 +169,7 @@
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,``0)">
+        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,System.Object)">
             <summary>
             Parses a generic value. To be called within Parsing method.
             <para>Usage: Property = Generic&lt;DataType&gt;("property_key", Property);</para>
@@ -159,24 +209,73 @@
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
         </member>
+        <member name="T:MilitiaDataParsing.OutputEventArgs">
+            <summary>
+            Defines information about a parsing warning or error.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.OutputEventArgs.Message">
+            <summary>
+            Message detailing the cause of warning or error.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.OutputEventArgs.Exception">
+            <summary>
+            The exception thrown causing the warning or error.
+            </summary>
+        </member>
+        <member name="T:MilitiaDataParsing.ParserHandler">
+            <summary>
+            Represents a handler for a parser.
+            </summary>
+        </member>
+        <member name="E:MilitiaDataParsing.ParserHandler.Output">
+            <summary>
+            Occurs when the handler or its parser ejects information on warnings or errors. A EventHandler can be provided through the constructor to register possible initializing errors.
+            </summary>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.#ctor(MilitiaDataParsing.Parser,System.EventHandler{MilitiaDataParsing.OutputEventArgs})">
+            <summary>
+            Initialize a parser handler using a specific parser and provided EventHandler for listening to Output.
+            </summary>
+            <param name="parser">Parser to be used.</param>
+            <param name="onOutput">EventHandler to be registered to Output.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.#ctor(System.EventHandler{MilitiaDataParsing.OutputEventArgs})">
+            <summary>
+            Initialize a parser handler using the default parser with a provided EventHandler for listening to Output.
+            </summary>
+            <param name="onOutput">EventHandler to be registered to Output.</param>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.#ctor">
+            <summary>
+            Initialize a parser handler using the default parser.
+            </summary>
+        </member>
+        <member name="M:MilitiaDataParsing.ParserHandler.IndexType(System.Type)">
+            <summary>
+            If you're having problems importing embedded objects which derive from the variable type, try indexing them with this method first.
+            </summary>
+            <param name="type">Type to store.</param>
+        </member>
         <member name="M:MilitiaDataParsing.ParserHandler.Import``1(System.String)">
             <summary>
-            Creates a new object from source data.
+            Creates and returns a new object from source data.
             </summary>
             <param name="data">Source data.</param>
         </member>
         <member name="M:MilitiaDataParsing.ParserHandler.Update(System.String,MilitiaDataParsing.IParsable)">
             <summary>
-            Updates an existing object with source data.
+            Updates a provided object with source data.
             </summary>
             <param name="data">Source data.</param>
             <param name="obj">Existing object.</param>
         </member>
         <member name="M:MilitiaDataParsing.ParserHandler.Export(MilitiaDataParsing.IParsable)">
             <summary>
-            Creates source data for an existing object.
+            Returns source data for the provided object.
             </summary>
-            <param name="obj">Object.</param>
+            <param name="obj">Existing object.</param>
         </member>
     </members>
 </doc>
