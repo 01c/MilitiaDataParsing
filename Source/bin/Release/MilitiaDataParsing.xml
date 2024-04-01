@@ -52,7 +52,7 @@
             States the current task of the parser.
             </summary>
         </member>
-        <member name="F:MilitiaDataParsing.Parser.stringSymbol">
+        <member name="F:MilitiaDataParsing.Parser.stringContainer">
             <summary>
             Symbol to surround string values.
             </summary>
@@ -81,133 +81,149 @@
             <param name="key">Key in source data.</param>
             <param name="property">List to be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Auto``1(System.String,``0@)">
+        <member name="M:MilitiaDataParsing.Parser.Auto``1(System.String,``0@,System.Boolean)">
             <summary>
             Parse any value. To be called within Parsing method.
             <para>Usage: Auto("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Auto``1(System.String,``0)">
+        <member name="M:MilitiaDataParsing.Parser.Auto``1(System.String,``0,System.Boolean)">
             <summary>
             Parse any value. To be called within Parsing method.
             <para>Usage: Property = Auto("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Value(System.String,System.Object@)">
+        <member name="M:MilitiaDataParsing.Parser.Value(System.String,System.Object@,System.Boolean)">
             <summary>
             Parses a value. To be called within Parsing method.
             <para>Usage: String("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Value(System.String,System.Object)">
+        <member name="M:MilitiaDataParsing.Parser.Value(System.String,System.Object,System.Boolean)">
             <summary>
             Parses a value. To be called within Parsing method.
             <para>Usage: Property = String("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Bool(System.String,System.Boolean@)">
+        <member name="M:MilitiaDataParsing.Parser.Bool(System.String,System.Boolean@,System.Boolean)">
             <summary>
             Parses a bool value. To be called within Parsing method.
             <para>Usage: Bool("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Bool(System.String,System.Boolean)">
+        <member name="M:MilitiaDataParsing.Parser.Bool(System.String,System.Boolean,System.Boolean)">
             <summary>
             Parses a bool value. To be called within Parsing method.
             <para>Usage: Property = Bool("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Enum``1(System.String,``0@)">
+        <member name="M:MilitiaDataParsing.Parser.Enum``1(System.String,``0@,System.Boolean)">
             <summary>
             Parses a enum value. To be called within Parsing method.
             <para>Usage: Enum("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Enum``1(System.String,``0)">
+        <member name="M:MilitiaDataParsing.Parser.Enum``1(System.String,``0,System.Boolean)">
             <summary>
             Parses a enum value. To be called within Parsing method.
             <para>Usage: Property = Enum("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Float(System.String,System.Single@)">
+        <member name="M:MilitiaDataParsing.Parser.Float(System.String,System.Single@,System.Boolean)">
             <summary>
             Parses a float value. To be called within Parsing method.
             <para>Usage: Float("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Float(System.String,System.Single)">
+        <member name="M:MilitiaDataParsing.Parser.Float(System.String,System.Single,System.Boolean)">
             <summary>
             Parses a float value. To be called within Parsing method.
             <para>Usage: Property = Float("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,``0@)">
+        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,``0@,System.Boolean)">
             <summary>
             Parses a generic value. To be called within Parsing method.
             <para>Usage: Generic&lt;DataType&gt;("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,System.Object)">
+        <member name="M:MilitiaDataParsing.Parser.Generic``1(System.String,System.Object,System.Boolean)">
             <summary>
             Parses a generic value. To be called within Parsing method.
             <para>Usage: Property = Generic&lt;DataType&gt;("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Int(System.String,System.Int32@)">
+        <member name="M:MilitiaDataParsing.Parser.Int(System.String,System.Int32@,System.Boolean)">
             <summary>
             Parses an int value. To be called within Parsing method.
             <para>Usage: Int("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.Int(System.String,System.Int32)">
+        <member name="M:MilitiaDataParsing.Parser.Int(System.String,System.Int32,System.Boolean)">
             <summary>
             Parses an int value. To be called within Parsing method.
             <para>Usage: Property = Int("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.String(System.String,System.String@)">
+        <member name="M:MilitiaDataParsing.Parser.String(System.String,System.String@,System.Boolean)">
             <summary>
             Parses a string value. To be called within Parsing method.
             <para>Usage: String("field_key", field);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="field">Field to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
-        <member name="M:MilitiaDataParsing.Parser.String(System.String,System.String)">
+        <member name="M:MilitiaDataParsing.Parser.String(System.String,System.String,System.Boolean)">
             <summary>
             Parses a string value. To be called within Parsing method.
             <para>Usage: Property = String("property_key", Property);</para>
             </summary>
             <param name="key">Key in source data.</param>
             <param name="property">Property to be processed.</param>
+            <param name="required">Will return warnings if required and value could not be processed.</param>
         </member>
         <member name="T:MilitiaDataParsing.OutputEventArgs">
             <summary>
@@ -222,6 +238,26 @@
         <member name="P:MilitiaDataParsing.OutputEventArgs.Exception">
             <summary>
             The exception thrown causing the warning or error.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.ParserConfiguration.StringReference">
+            <summary>
+            Symbol to indicate a string value.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.ParserConfiguration.StringBlock">
+            <summary>
+            Symbol to surround string values.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.ParserConfiguration.ContainerHeader">
+            <summary>
+            Indicates the start of a new container.
+            </summary>
+        </member>
+        <member name="P:MilitiaDataParsing.ParserConfiguration.ContainerFooter">
+            <summary>
+            Indicates the end of a container.
             </summary>
         </member>
         <member name="T:MilitiaDataParsing.ParserHandler">

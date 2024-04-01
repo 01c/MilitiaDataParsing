@@ -25,6 +25,7 @@ $RECYCLE.BIN/
 *.exe
 
 /Example/*/
+*/bin/*
 */obj/*
 */Properties/*
 
@@ -58,3 +59,4 @@ Temporary Items
 .apdisk
 *.pdb
 *.manifest
+/.vs/*

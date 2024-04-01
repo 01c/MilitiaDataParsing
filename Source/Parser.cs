@@ -25,7 +25,7 @@ namespace MilitiaDataParsing
     /// <summary>
     /// Represents a parser and its logic used to export and import data.
     /// </summary>
-    public class Parser
+    public partial class Parser
     {
         #region Properties
         /// <summary>
@@ -45,7 +45,7 @@ namespace MilitiaDataParsing
         /// <summary>
         /// Symbol to surround string values.
         /// </summary>
-        protected string stringSymbol = "\"";
+        protected string stringContainer = "\"";
 
         /// <summary>
         /// Indicates the start of a new container.
@@ -64,7 +64,7 @@ namespace MilitiaDataParsing
         /// <param name="data">The value loaded from source data.</param>
         protected virtual T TryParse<T>(string data)
         {
-            return default(T);
+            return default;
         }
 
         internal void Initialize(ParserHandler handler)
@@ -161,7 +161,7 @@ namespace MilitiaDataParsing
                 List<string> strings = new List<string>();
                 int stringIndex = 0;
                 // Search for strings.
-                int index = -1;
+                int index;
                 do
                 {
                     // Find start of string.
@@ -173,7 +173,7 @@ namespace MilitiaDataParsing
                         if (endIndex != -1)
                         {
                             // Restore escaped string symbols if any and store string.
-                            strings.Add(mainContext.Substring(index + 1, endIndex - index - 1).Replace(Escaped(stringSymbol), stringSymbol));
+                            strings.Add(mainContext.Substring(index + 1, endIndex - index - 1).Replace(Escaped(stringContainer), stringContainer));
 
                             // Replace string with a reference key.
                             mainContext = mainContext.Substring(0, index) + stringValueReferenceSymbol + stringIndex + mainContext.Substring(endIndex + 1);
@@ -204,12 +204,12 @@ namespace MilitiaDataParsing
             do
             {
                 // Find start of string.
-                index = context.IndexOf(stringSymbol, index);
+                index = context.IndexOf(stringContainer, index);
 
                 if (index != -1)
                 {
                     // Isn't escaped string symbol.
-                    if (!context.Substring(index - 1).StartsWith(Escaped(stringSymbol)))
+                    if (!context.Substring(index - 1).StartsWith(Escaped(stringContainer)))
                         return index;
                     else
                         index++;
@@ -237,7 +237,7 @@ namespace MilitiaDataParsing
             switch (Task)
             {
                 case Task.Importing:
-                    string newContext = GetContainerContents(key, buffer.currentContext);
+                    string newContext = GetContainerContents(key, buffer.CurrentContext);
                     if (newContext != null)
                     {
                         buffer.contexts.Add(newContext);
@@ -276,14 +276,13 @@ namespace MilitiaDataParsing
 
             int totalLength = 0;
             int currentIndention = 0;
-
-            int iHeader = -1, iFooter = -1;
+            int iHeader, iFooter;
             do
             {
                 iHeader = context.IndexOf(header);
                 iFooter = context.IndexOf(footer);
 
-                int newIndex = 0;
+                int newIndex;
                 // Header found AND (footer NOT found OR header found before footer).
                 if (iHeader != -1 && (iFooter == -1 || iHeader < iFooter))
                 {
@@ -399,11 +398,10 @@ namespace MilitiaDataParsing
             if (value == null)
                 return null;
 
-            string val = null;
+            string val;
 
-            IParsable parsable = value as IParsable;
             // Writing a child object.
-            if (parsable != null)
+            if (value is IParsable parsable)
             {
                 // Store current buffer.
                 ParseBuffer mainBuffer = buffer;
@@ -426,9 +424,9 @@ namespace MilitiaDataParsing
             return val;
         }
 
-        private string ReadValue(string key)
+        private string ReadValue(string key, bool required = false)
         {
-            string context = buffer.currentContext;
+            string context = buffer.CurrentContext;
 
             // Search for start of key header.
             int iHeader = IndexWithinContext(Case(context), KeyHeader(key));
@@ -436,7 +434,8 @@ namespace MilitiaDataParsing
             // Not found, key doesn't exist in this context.
             if (iHeader == -1)
             {
-                Output("Couldn't find key header for \"" + key + "\".", null);
+                if (required)
+                    Output("Couldn't find key header for \"" + key + "\".", null);
                 return null;
             }
 
@@ -477,241 +476,18 @@ namespace MilitiaDataParsing
             }
         }
 
-        private string ProcessValue(string key, object value)
+        private string ProcessValue(string key, object value, bool required = false)
         {
             switch (Task)
             {
                 case Task.Importing:
-                    return ReadValue(key);
+                    return ReadValue(key, required);
                 case Task.Exporting:
                     return WriteValue(key, value);
             }
             return null;
         }
         #endregion Logic
-
-        #region Parsing front end
-        /// <summary>
-        /// Parses a list. To be called within Parsing method.
-        /// <para>Usage: Property = List("key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">List to be processed.</param>
-        public List<T> List<T>(string key, List<T> property)
-        {
-            switch (Task)
-            {
-                case Task.Importing:
-                    List<T> list = new List<T>();
-                    foreach (T rawValue in ParseList<T>(key))
-                    {
-                        list.Add(rawValue);
-                    }
-                    return list;
-                case Task.Exporting:
-                    if (SetContext(key))
-                    {
-                        for (int i = 0; i < property.Count; i++)
-                        {
-                            Auto(i.ToString(), property[i]);
-                        }
-                        EndContext(key);
-                    }
-                    return property;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Parse any value. To be called within Parsing method.
-        /// <para>Usage: Auto("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Auto<T>(string key, ref T field)
-        {
-            field = ParseAuto<T>(key, field);
-        }
-
-        /// <summary>
-        /// Parse any value. To be called within Parsing method.
-        /// <para>Usage: Property = Auto("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Field to be processed.</param>
-        public T Auto<T>(string key, T property)
-        {
-            return ParseAuto<T>(key, property);
-        }
-
-        /// <summary>
-        /// Parses a value. To be called within Parsing method.
-        /// <para>Usage: String("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Value(string key, ref object field)
-        {
-            field = Value(key, field);
-        }
-
-        /// <summary>
-        /// Parses a value. To be called within Parsing method.
-        /// <para>Usage: Property = String("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Property to be processed.</param>
-        public string Value(string key, object property)
-        {
-            return ProcessValue(key, property);
-        }
-
-        /// <summary>
-        /// Parses a bool value. To be called within Parsing method.
-        /// <para>Usage: Bool("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Bool(string key, ref bool field)
-        {
-            field = Bool(key, field);
-        }
-
-        /// <summary>
-        /// Parses a bool value. To be called within Parsing method.
-        /// <para>Usage: Property = Bool("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Property to be processed.</param>
-        public bool Bool(string key, bool property)
-        {
-            return ParseBool(ProcessValue(key, property));
-        }
-
-        /// <summary>
-        /// Parses a enum value. To be called within Parsing method.
-        /// <para>Usage: Enum("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Enum<T>(string key, ref T field) where T : struct, IComparable, IFormattable, IConvertible
-        {
-            field = Enum(key, field);
-        }
-
-        /// <summary>
-        /// Parses a enum value. To be called within Parsing method.
-        /// <para>Usage: Property = Enum("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Property to be processed.</param>
-        public T Enum<T>(string key, T property)
-        {
-            return ParseEnum<T>(ProcessValue(key, property));
-        }
-
-        /// <summary>
-        /// Parses a float value. To be called within Parsing method.
-        /// <para>Usage: Float("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Float(string key, ref float field)
-        {
-            field = Float(key, field);
-        }
-
-        /// <summary>
-        /// Parses a float value. To be called within Parsing method.
-        /// <para>Usage: Property = Float("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Property to be processed.</param>
-        public float Float(string key, float property)
-        {
-            return ParseFloat(ProcessValue(key, property));
-        }
-
-        /// <summary>
-        /// Parses a generic value. To be called within Parsing method.
-        /// <para>Usage: Generic&lt;DataType&gt;("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Generic<T>(string key, ref T field)
-        {
-            field = Generic<T>(key, field);
-        }
-
-        /// <summary>
-        /// Parses a generic value. To be called within Parsing method.
-        /// <para>Usage: Property = Generic&lt;DataType&gt;("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Field to be processed.</param>
-        public T Generic<T>(string key, object property)
-        {
-            string processed = ProcessValue(key, property);
-            if (Task == Task.Exporting)
-                return (T)property;
-            else
-            {
-                return ParseGeneric<T>(processed);
-            }
-        }
-
-        /// <summary>
-        /// Parses an int value. To be called within Parsing method.
-        /// <para>Usage: Int("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void Int(string key, ref int field)
-        {
-            field = Int(key, field);
-        }
-
-        /// <summary>
-        /// Parses an int value. To be called within Parsing method.
-        /// <para>Usage: Property = Int("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Property to be processed.</param>
-        public int Int(string key, int property)
-        {
-            return (int)ParseInt(ProcessValue(key, property));
-        }
-
-        /// <summary>
-        /// Parses a string value. To be called within Parsing method.
-        /// <para>Usage: String("field_key", field);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="field">Field to be processed.</param>
-        public void String(string key, ref string field)
-        {
-            field = String(key, field);
-        }
-
-        /// <summary>
-        /// Parses a string value. To be called within Parsing method.
-        /// <para>Usage: Property = String("property_key", Property);</para>
-        /// </summary>
-        /// <param name="key">Key in source data.</param>
-        /// <param name="property">Property to be processed.</param>
-        public string String(string key, string property)
-        {
-            switch (Task)
-            {
-                case Task.Importing:
-                    return ParseString(ProcessValue(key, property));
-                case Task.Exporting:
-                    ProcessValue(key, ParseString(property));
-                    return property;
-            }
-            return null;
-        }
-        #endregion Parsing front end
 
         #region Parsing back end
         private List<T> ParseList<T>(string key)
@@ -720,16 +496,16 @@ namespace MilitiaDataParsing
             if (SetContext(key))
             {
                 int i = 0;
-                int iHeader = -1;
+                int iHeader;
                 do
                 {
                     // Find header for current element within context.
-                    iHeader = IndexWithinContext(buffer.currentContext, KeyHeader(i.ToString()));
+                    iHeader = IndexWithinContext(buffer.CurrentContext, KeyHeader(i.ToString()));
                     // Header exists.
                     if (iHeader != -1)
                     {
                         // Get value.
-                        T value = ParseAuto<T>(i.ToString(), buffer.currentContext.Substring(iHeader));
+                        T value = ParseAuto<T>(i.ToString(), buffer.CurrentContext.Substring(iHeader));
                         if (value != null)
                             list.Add(value);
                         i++;
@@ -740,29 +516,29 @@ namespace MilitiaDataParsing
             return list;
         }
 
-        private T ParseAuto<T>(string key, object property)
+        private T ParseAuto<T>(string key, object property, bool required = false)
         {
             Type type = typeof(T);
 
             // Bool.
             if (type == typeof(bool))
-                return (T)(object)Bool(key, bool.Parse(property.ToString()));
+                return (T)(object)Bool(key, bool.Parse(property.ToString()), required);
             // Enum.
             else if (type.IsEnum)
                 return Enum(key, (T)property);
             // Float.
             else if (type == typeof(float))
-                return (T)(object)Float(key, float.Parse(property.ToString()));
+                return (T)(object)Float(key, float.Parse(property.ToString()), required);
             // Int.
             else if (type == typeof(int))
-                return (T)(object)Int(key, int.Parse(property.ToString()));
+                return (T)(object)Int(key, int.Parse(property.ToString()), required);
             // String.
             else if (type == typeof(string))
-                return (T)(object)String(key, property as string);
+                return (T)(object)String(key, property as string, required);
             // Generic.
             else
             {
-                return Generic<T>(key, property);
+                return Generic<T>(key, property, required);
             }
         }
 
@@ -790,7 +566,7 @@ namespace MilitiaDataParsing
         private T ParseGeneric<T>(string value)
         {
             if (value == "" || value == null)
-                return default(T);
+                return default;
 
             // Is a new (parsable) object.
             if (value.StartsWith(EmbeddedObjectKeyword()) && typeof(IParsable).IsAssignableFrom(typeof(T)))
@@ -864,7 +640,7 @@ namespace MilitiaDataParsing
                     }
                     return value;
                 case Task.Exporting:
-                    value = value.Replace(stringSymbol, Escaped(stringSymbol));
+                    value = value.Replace(stringContainer, Escaped(stringContainer));
                     value = "\"" + value + "\"";
                     return value;
             }

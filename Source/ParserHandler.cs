@@ -17,7 +17,7 @@ namespace MilitiaDataParsing
         #endregion Properties
 
         #region Fields
-        private Parser parser;
+        private readonly Parser parser;
         internal List<StoredType> storedTypes;
         #endregion Fields
 
@@ -127,13 +127,12 @@ namespace MilitiaDataParsing
 
         internal void OnOutput(string message, Exception exception)
         {
-            if (Output != null)
-                Output(this, new OutputEventArgs(message, exception));
+            Output?.Invoke(this, new OutputEventArgs(message, exception));
         }
 
         internal virtual string GetIParsableHeader(IParsable parsable)
         {
-            return parsable.Header != null ? parsable.Header : parsable.GetType().Name;
+            return parsable.Header ?? parsable.GetType().Name;
         }
 
         internal IParsable ImportProcess(string data, Type type)

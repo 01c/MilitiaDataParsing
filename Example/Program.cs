@@ -1,13 +1,12 @@
-﻿using System;
+﻿using MilitiaDataParsing;
+using System;
 using System.Collections.Generic;
-using MilitiaDataParsing;
-using System.Reflection;
 
 namespace Example
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             ParserHandler parser = new ParserHandler(ParserOnOutput);
 
@@ -20,16 +19,16 @@ namespace Example
             org.Employees.Add(new Person("Shane", "Osborne", 35, Gender.Male, new Details("1880 Timber Oak Drive", "805-926-2039", "ShaneKOsborne@teleworm.us")));
 
             string orgData = parser.Export(org);
-            Console.WriteLine("--orgData:");
+            Console.WriteLine("Exporting org as orgData:");
             Console.WriteLine(orgData);
 
             string orgData2 = parser.Export(org);
-            Console.WriteLine("--orgData2:");
+            Console.WriteLine("Exporting org as orgData2:");
             Console.WriteLine(orgData2);
 
             Organization org2 = parser.Import<Organization>(orgData2) as Organization;
             string orgData3 = parser.Export(org2);
-            Console.WriteLine("--orgData3:");
+            Console.WriteLine("Imported orgData2 and exported as orgData3:");
             Console.WriteLine(orgData3);
 
             if (orgData == orgData2 && orgData == orgData3)

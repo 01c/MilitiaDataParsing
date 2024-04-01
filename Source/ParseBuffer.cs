@@ -10,7 +10,7 @@ namespace MilitiaDataParsing
 
         internal List<string> contexts;
         internal int contextIndex;
-        internal string currentContext
+        internal string CurrentContext
         {
             get { return contexts[contextIndex]; }
             set { contexts[contextIndex] = value; }
