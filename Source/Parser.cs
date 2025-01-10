@@ -56,6 +56,11 @@ namespace MilitiaDataParsing
         /// Indicates the end of a container.
         /// </summary>
         protected string containerFooterSymbol = "}";
+
+        /// <summary>
+        /// Indicates the end of a container.
+        /// </summary>
+        protected string newLineSymbol = Environment.NewLine;
         #endregion Fields
 
         /// <summary>
@@ -81,12 +86,12 @@ namespace MilitiaDataParsing
         #region Syntax
         protected virtual string ContainerHeaderSyntax(string key, string symbol)
         {
-            return key + " " + symbol + Environment.NewLine;
+            return key + " " + symbol + newLineSymbol;
         }
 
         protected virtual string ContainerFooterSyntax(string key, string symbol)
         {
-            return symbol + Environment.NewLine;
+            return symbol + newLineSymbol;
         }
 
         protected virtual string KeyHeaderSyntax(string key)
@@ -96,7 +101,7 @@ namespace MilitiaDataParsing
 
         protected virtual string KeyFooterSyntax(string key)
         {
-            return Environment.NewLine;
+            return newLineSymbol;
         }
 
         protected virtual string EmbeddedObjectKeywordSyntax()
@@ -413,7 +418,7 @@ namespace MilitiaDataParsing
                 buffer = mainBuffer;
 
                 // Properly indent child data.
-                val = val.Replace(Environment.NewLine, Environment.NewLine + Indentation());
+                val = val.Replace(newLineSymbol, newLineSymbol + Indentation());
             }
             else
             {
@@ -442,7 +447,7 @@ namespace MilitiaDataParsing
             // Go to start of key header.
             context = context.Substring(iHeader);
 
-            string firstLine = context.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0];
+            string firstLine = context.Split(new string[] { newLineSymbol }, StringSplitOptions.RemoveEmptyEntries)[0];
             // Is container.
             if (firstLine.Contains(containerHeaderSymbol))
             {

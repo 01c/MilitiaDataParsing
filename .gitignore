@@ -25,6 +25,8 @@ $RECYCLE.BIN/
 *.exe
 
 /Example/*/
+/bin/*
+/obj/*
 */bin/*
 */obj/*
 */Properties/*

@@ -1,6 +1,4 @@
 ﻿using MilitiaDataParsing;
-using System;
-using System.Collections.Generic;
 
 namespace Example
 {

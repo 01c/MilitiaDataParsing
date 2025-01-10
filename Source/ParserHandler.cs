@@ -77,6 +77,10 @@ namespace MilitiaDataParsing
                 }
             }
 
+            // TODO:
+            // No instance should be created at this stage (only to get information about parsing...), use attributes instead.
+            // Code in the parsable constructor could mess things up.
+
             IParsable parsable = (IParsable)(Activator.CreateInstance(type));
             string header = GetIParsableHeader(parsable);
             // Make sure no other type shares the same header.
