@@ -48,8 +48,6 @@ namespace MilitiaDataParsing
                     }
                 }
             }
-
-            OnOutput("ParserHandler initialized. Version 1.0.");
         }
 
         /// <summary>

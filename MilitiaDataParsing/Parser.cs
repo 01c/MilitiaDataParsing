@@ -597,8 +597,8 @@ namespace MilitiaDataParsing
                 ParseBuffer mainBuffer = buffer;
 
                 // Get object.
-                //IParsable obj = handler.ImportProcess(value, type);
-                IParsable obj = handler.ImportProcess(value, type, (IParsable)instance);
+                IParsable obj = handler.ImportProcess(value, type);
+                //IParsable obj = handler.ImportProcess(value, type, (IParsable)instance);
 
                 // Restore buffer.
                 buffer = mainBuffer;
