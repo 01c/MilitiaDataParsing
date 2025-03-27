@@ -56,11 +56,6 @@ namespace MilitiaDataParsing
         /// Indicates the end of a container.
         /// </summary>
         protected string containerFooterSymbol = "}";
-
-        /// <summary>
-        /// Indicates the end of a container.
-        /// </summary>
-        protected string newLineSymbol = Environment.NewLine;
         #endregion Fields
 
         /// <summary>
@@ -78,20 +73,28 @@ namespace MilitiaDataParsing
             Reset();
         }
 
-        private void Output(string message, Exception exception)
+        private void Output(string message, Exception exception = null)
         {
-            handler.OnOutput("Error occured loading \"" + mainContainer + "\". " + message, exception);
+            handler.OnOutput($"Error occured loading '{mainContainer}'. {message}", exception);
         }
 
         #region Syntax
+        /// <summary>
+        /// Indicates the end of a container.
+        /// </summary>
+        protected virtual string NewLineSymbol()
+        {
+            return "\n";
+        }
+
         protected virtual string ContainerHeaderSyntax(string key, string symbol)
         {
-            return key + " " + symbol + newLineSymbol;
+            return key + " " + symbol + NewLineSymbol();
         }
 
         protected virtual string ContainerFooterSyntax(string key, string symbol)
         {
-            return symbol + newLineSymbol;
+            return symbol + NewLineSymbol();
         }
 
         protected virtual string KeyHeaderSyntax(string key)
@@ -101,7 +104,7 @@ namespace MilitiaDataParsing
 
         protected virtual string KeyFooterSyntax(string key)
         {
-            return newLineSymbol;
+            return NewLineSymbol();
         }
 
         protected virtual string EmbeddedObjectKeywordSyntax()
@@ -314,7 +317,7 @@ namespace MilitiaDataParsing
             }
             while (iHeader != -1 || iFooter != -1);
 
-            Output("Failed retrieving length of \"" + key + "\" container.", null);
+            Output($"Failed retrieving length of '{key}' container.");
             return -1;
         }
 
@@ -324,7 +327,7 @@ namespace MilitiaDataParsing
             int headerIndex = Case(context).IndexOf(ContainerHeader(key));
             if (headerIndex == -1)
             {
-                Output("Couldn't find header for \"" + key + "\" key.", null);
+                Output($"Couldn't find header for '{key}' key. Looking for '{ContainerHeader(key)}' in context '{context}'");
                 return null;
             }
 
@@ -418,7 +421,7 @@ namespace MilitiaDataParsing
                 buffer = mainBuffer;
 
                 // Properly indent child data.
-                val = val.Replace(newLineSymbol, newLineSymbol + Indentation());
+                val = val.Replace(NewLineSymbol(), NewLineSymbol() + Indentation());
             }
             else
             {
@@ -440,14 +443,14 @@ namespace MilitiaDataParsing
             if (iHeader == -1)
             {
                 if (required)
-                    Output("Couldn't find key header for \"" + key + "\".", null);
+                    Output("Couldn't find key header for '{key}'.");
                 return null;
             }
 
             // Go to start of key header.
             context = context.Substring(iHeader);
 
-            string firstLine = context.Split(new string[] { newLineSymbol }, StringSplitOptions.RemoveEmptyEntries)[0];
+            string firstLine = context.Split(new string[] { NewLineSymbol() }, StringSplitOptions.RemoveEmptyEntries)[0];
             // Is container.
             if (firstLine.Contains(containerHeaderSymbol))
             {
@@ -568,7 +571,7 @@ namespace MilitiaDataParsing
             return float.Parse(value);
         }
 
-        private T ParseGeneric<T>(string value)
+        private T ImportGeneric<T>(string value, object instance)
         {
             if (value == "" || value == null)
                 return default;
@@ -594,13 +597,15 @@ namespace MilitiaDataParsing
                 ParseBuffer mainBuffer = buffer;
 
                 // Get object.
-                IParsable obj = handler.ImportProcess(value, type);
+                //IParsable obj = handler.ImportProcess(value, type);
+                IParsable obj = handler.ImportProcess(value, type, (IParsable)instance);
 
                 // Restore buffer.
                 buffer = mainBuffer;
 
                 return (T)obj;
             }
+            // Is probably a primitive.
             else
             {
                 T t = TryParse<T>(value);

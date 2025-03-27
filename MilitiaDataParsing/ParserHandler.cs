@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace MilitiaDataParsing
 {
@@ -48,6 +48,8 @@ namespace MilitiaDataParsing
                     }
                 }
             }
+
+            OnOutput("ParserHandler initialized. Version 1.0.");
         }
 
         /// <summary>
@@ -129,7 +131,7 @@ namespace MilitiaDataParsing
             return data;
         }
 
-        internal void OnOutput(string message, Exception exception)
+        internal void OnOutput(string message, Exception exception = null)
         {
             Output?.Invoke(this, new OutputEventArgs(message, exception));
         }
@@ -137,6 +139,17 @@ namespace MilitiaDataParsing
         internal virtual string GetIParsableHeader(IParsable parsable)
         {
             return parsable.Header ?? parsable.GetType().Name;
+        }
+
+        /* WIP */
+        internal IParsable ImportProcess(string data, Type type, IParsable obj)
+        {
+            if (obj == null)
+            {
+                ImportProcess(data, type);
+            }
+            // Otherwise, update the existing object.
+            return parser.Process(data, Task.Importing, obj);
         }
 
         internal IParsable ImportProcess(string data, Type type)

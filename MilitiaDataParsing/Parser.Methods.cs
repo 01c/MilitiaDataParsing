@@ -184,7 +184,7 @@ namespace MilitiaDataParsing
                 return (T)property;
             else
             {
-                return ParseGeneric<T>(processed);
+                return ImportGeneric<T>(processed, property);
             }
         }
 
